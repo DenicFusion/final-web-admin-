@@ -5,11 +5,11 @@
   <meta name='viewport' content='width=device-width,initial-scale=1'/>
   <title>Join Training Session</title>
   <style>
-    :root{--accent:#2196f3;--red:#E53935;--card:#fff}
-    body{font-family:Inter,Arial,sans-serif;background:linear-gradient(180deg,#fff,#e3f2fd);margin:0;color:#111;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+    :root{--accent:#6C63FF;--red:#E53935;--card:#fff}
+    body{font-family:Inter,Arial,sans-serif;background:linear-gradient(180deg,#fff,#f2f6ff);margin:0;color:#111;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
     .wrap{max-width:720px;background:var(--card);padding:28px;border-radius:14px;box-shadow:0 8px 30px rgba(20,20,60,0.06);text-align:center}
     h1{color:var(--red);margin:0 0 8px;font-size:22px}
-    .slot{margin:18px auto;padding:14px;border-radius:10px;background:#f9fcff;border:1px dashed #90caf9;font-weight:700}
+    .slot{margin:18px auto;padding:14px;border-radius:10px;background:#fbfbff;border:1px dashed #d6d6ff;font-weight:700}
     .cta{display:inline-block;margin-top:16px;background:var(--accent);color:#fff;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:700}
     p{color:#333;line-height:1.5}
     .hint{font-size:13px;color:#666;margin-top:12px}
@@ -31,22 +31,38 @@
     <div class="hint">Govt. Approved</div>
   </div>
 
-  <script>
-    const slotBox = document.getElementById('slotBox');
-    const joinBtn = document.getElementById('joinBtn');
+<script>
+  // load registration saved from page1 (localStorage) OR if none, show default using /group
+  const reg = JSON.parse(localStorage.getItem('registration') || 'null');
+  const slotBox = document.getElementById('slotBox');
+  const joinBtn = document.getElementById('joinBtn');
 
-    (function(){
-      let sessionLink = localStorage.getItem("sessionLink") || "#";
+  (async function(){
+    let whatsappLink = '/whatsapp-link-placeholder'; // ✅ Changed variable name
+    try {
+      const res = await fetch('/group');
+      if(res.ok){
+        const g = await res.json();
+        whatsappLink = g.whatsappGroupLink || whatsappLink; // ✅ Pull from correct field
 
-      // Show date slot
-      const d = new Date();
-      d.setDate(d.getDate()+1);
-      const opt = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
-      slotBox.innerHTML = `Your training slot is reserved at:<br><strong>${d.toLocaleDateString('en-US', opt)} at 07:00 PM</strong>`;
+        // Set training slot info
+        const d = reg && reg.date ? new Date(reg.date) : new Date(Date.now() + 86400000);
+        const opt = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+        const dateText = d.toLocaleDateString('en-US', opt);
+        slotBox.innerHTML = `Your training slot is reserved at:<br><strong>${dateText} at 07:00 PM</strong>`;
 
-      // Apply session link
-      joinBtn.href = sessionLink;
-    })();
-  </script>
+        // ✅ Use WhatsApp link for JOIN button
+        joinBtn.href = whatsappLink;
+      } else {
+        slotBox.textContent = 'Failed to load group info.';
+        joinBtn.style.display = 'none';
+      }
+    } catch(e){
+      console.error(e);
+      slotBox.textContent = 'Failed to load group info.';
+      joinBtn.style.display = 'none';
+    }
+  })();
+</script>
 </body>
 </html>
