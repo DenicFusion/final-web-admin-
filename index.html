@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>High Posting Jobs — Register</title>
+  <style>
+    :root{
+      --red:#E53935;
+      --bg:#f7f8fb;
+      --card:#ffffff;
+      --muted:#666;
+      --accent:#6C63FF;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(180deg,#fff,#f0f4ff);color:#111}
+    .container{max-width:820px;margin:40px auto;padding:24px}
+    header{text-align:center;padding:10px 0}
+    h1{color:var(--red);font-size:26px;margin:0 0 8px}
+    h2{color:#111;font-size:18px;margin:0 0 18px;font-weight:700}
+    .card{background:var(--card);border-radius:12px;padding:20px;box-shadow:0 6px 20px rgba(20,20,60,0.06);margin-bottom:18px}
+    .requirements ul{padding-left:18px;margin:0}
+    .requirements li{list-style:none;margin:12px 0;padding-left:34px;position:relative;font-size:16px;color:#222}
+    .requirements li:before{content:'✔';position:absolute;left:0;top:0;color:var(--red);font-weight:800;background:#fff;padding:2px 6px;border-radius:6px}
+    .consent{border:2px dashed #d6d6d6;padding:18px;border-radius:10px;display:flex;align-items:flex-start;gap:12px;background:linear-gradient(90deg,#fff,#fbfbff)}
+    .consent input{width:20px;height:20px}
+    .form-row{display:grid;grid-template-columns:1fr;gap:12px;margin-top:14px}
+    input[type=text], input[type=email], select{width:100%;padding:12px;border-radius:8px;border:1px solid #e0e6ff;font-size:15px}
+    .btn{display:inline-block;background:var(--red);color:#fff;padding:14px 18px;border-radius:10px;font-weight:700;text-decoration:none;text-align:center;border:none;cursor:pointer;width:100%;font-size:16px}
+    .muted{text-align:center;color:var(--muted);font-size:13px;margin-top:8px}
+    footer{display:flex;justify-content:space-between;align-items:center;padding:6px 0;color:var(--muted);font-size:13px}
+    .small-btn{background:none;border:0;color:var(--accent);cursor:pointer;text-decoration:underline;padding:6px 8px;font-size:14px}
+    @media(min-width:720px){ .form-row{grid-template-columns:1fr 1fr} .form-row.full{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>In order to Start Earning Good Money With High Posting Jobs...</h1>
+      <h2>You Will Need These 3 Things</h2>
+    </header>
+
+    <section class="card requirements">
+      <ul>
+        <li>An internet connected smartphone, tablet or laptop</li>
+        <li>1–2hrs a day</li>
+        <li>A spirit of implementation and dedication</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <div class="consent">
+        <input id="consent" type="checkbox" aria-label="consent">
+        <div>
+          <strong>YES! I have these 3 things and I am going to apply this life-changing information once it is in my hands</strong>
+          <div class="muted" style="margin-top:6px">Tick the box to confirm and register</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <form id="regForm">
+        <div class="form-row full">
+          <label><select id="dateField" aria-label="date"></select></label>
+        </div>
+
+        <div class="form-row">
+          <input id="nameField" type="text" placeholder="Full Name" value="Samuel C Izuorah" required>
+          <input id="emailField" type="email" placeholder="Email address" value="samdenic01@gmail.com" required>
+        </div>
+
+        <div style="margin-top:12px">
+          <button id="registerBtn" class="btn" type="button">CLICK HERE TO REGISTER NOW!</button>
+        </div>
+      </form>
+      <div class="muted">Only people who check the box and fill the form will proceed.</div>
+    </section>
+
+    <footer>
+      <button class="small-btn" id="disclaimerBtn">Disclaimer</button>
+      <div>Govt. Approved</div>
+    </footer>
+  </div>
+
+  <script>
+    // fill date dropdown with today (single option) and also next few days for ease
+    const dateField = document.getElementById('dateField');
+    function formatDate(d){
+      return d.toLocaleDateString('en-US',{weekday:'long', year:'numeric', month:'long', day:'numeric'});
+    }
+    const today = new Date();
+    // populate today and next 4 days as options
+    for(let i=0;i<5;i++){
+      const d = new Date(today.getTime() + i*24*60*60*1000);
+      const opt = document.createElement('option');
+      opt.value = d.toISOString();
+      opt.textContent = formatDate(d);
+      dateField.appendChild(opt);
+    }
+    // default select today
+    dateField.selectedIndex = 0;
+
+    document.getElementById('registerBtn').addEventListener('click', ()=>{
+      const consent = document.getElementById('consent').checked;
+      const name = document.getElementById('nameField').value.trim();
+      const email = document.getElementById('emailField').value.trim();
+
+      if(!consent){ alert('You must agree to proceed.'); return; }
+      if(!name || !email){ alert('Please fill in name and email.'); return; }
+
+      // store registration data to localStorage temporarily and go to page2
+      const payload = { date: dateField.value, name, email };
+      localStorage.setItem('registration', JSON.stringify(payload));
+      window.location.href = '/page2.html';
+    });
+
+    // disclaimer popup
+    document.getElementById('disclaimerBtn').addEventListener('click', ()=>{
+      alert('Disclaimer: Results may vary. This training is not a guarantee of income.');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset='utf-8'>
+  <meta name='viewport' content='width=device-width,initial-scale=1'>
+  <title>Admin — Web Admin</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#7c3aed;--muted:#9aa4b2;--success:#16a34a}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:linear-gradient(180deg,#071024,#0f1724);color:#e6eef8;min-height:100vh;padding:28px}
+    .wrap{max-width:920px;margin:0 auto;display:grid;grid-template-columns:1fr 360px;gap:20px}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:20px;border-radius:12px;box-shadow:0 8px 30px rgba(2,6,23,0.6)}
+    .hero{display:flex;align-items:center;gap:14px}
+    .avatar{width:64px;height:64px;border-radius:12px;background:linear-gradient(90deg,var(--accent),#06b6d4);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:22px}
+    h1{margin:0;font-size:20px}
+    p.small{margin:4px 0 0;color:var(--muted)}
+    label{display:block;margin-top:12px;font-size:14px;color:#cfe4ff}
+    input, select, textarea{width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:#e6eef8}
+    .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:0;background:var(--accent);color:#fff;font-weight:700;cursor:pointer;margin-top:12px}
+    .muted{color:var(--muted);font-size:13px;margin-top:8px}
+    .right .card {position:sticky;top:28px}
+    .success{color:var(--success);font-weight:700;margin-top:8px}
+    .links-list{margin-top:12px}
+    .links-list li{background:rgba(255,255,255,0.02);padding:8px;border-radius:8px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+    .links-list code{font-size:13px;color:#bfe8ff}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="hero">
+        <div class="avatar">DF</div>
+        <div>
+          <h1>Welcome Back Denic 🌚</h1>
+          <p class="small">Manage group links, session link and site content from here.</p>
+        </div>
+      </div>
+
+      <hr style="border:none;border-top:1px solid rgba(255,255,255,0.03);margin:18px 0">
+
+      <label>Group Name</label>
+      <input id="groupName" placeholder="e.g. VIP Group">
+
+      <label>WhatsApp Group Link</label>
+      <input id="groupLink" placeholder="https://chat.whatsapp.com/xxxx">
+
+      <label>Status</label>
+      <select id="status">
+        <option value="open">open</option>
+        <option value="closed">closed</option>
+      </select>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div>
+          <label>Members Count</label>
+          <input id="membersCount" type="number" min="0">
+        </div>
+        <div>
+          <label>Max Members</label>
+          <input id="maxMembers" type="number" min="1">
+        </div>
+      </div>
+
+      <label>Session Link (JOIN button on Page2)</label>
+      <input id="sessionLink" placeholder="https://zoom.us/j/xxx or https://meet.google.com/xxx">
+
+      <label>Admin Password (for this demo the default is <code>Denic123*</code>)</label>
+      <input id="adminPassword" placeholder="Enter admin password to save">
+
+      <button class="btn" id="saveBtn">Save Changes</button>
+      <div id="msg" class="success" style="display:none">Saved ✓</div>
+
+      <h3 style="margin-top:18px">Saved Links</h3>
+      <ul id="linksList" class="links-list"></ul>
+    </div>
+
+    <div class="card right">
+      <h3 style="margin:0 0 8px">Quick Actions</h3>
+      <p class="muted">You can preview the live site and open the registration page.</p>
+
+      <div style="margin-top:12px">
+        <button class="btn" id="previewBtn">Preview Site</button>
+      </div>
+
+      <div style="margin-top:12px">
+        <button class="btn" id="openAdmin">Open Registration Page</button>
+      </div>
+
+      <div style="margin-top:18px">
+        <p class="muted">Current DB snapshot:</p>
+        <pre id="dbDump" style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;color:#bfe8ff;max-height:220px;overflow:auto"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function fetchData(){
+      try{
+        const res = await fetch('/group');
+        const data = await res.json();
+        return data;
+      }catch(e){ console.error(e); return null; }
+    }
+
+    async function populate(){
+      const d = await fetchData();
+      if(!d) return;
+      document.getElementById('groupName').value = d.groupName || '';
+      document.getElementById('groupLink').value = d.groupLink || '';
+      document.getElementById('status').value = d.status || 'open';
+      document.getElementById('membersCount').value = d.membersCount || 0;
+      document.getElementById('maxMembers').value = d.maxMembers || 50;
+      document.getElementById('sessionLink').value = d.sessionLink || '';
+      document.getElementById('dbDump').textContent = JSON.stringify(d, null, 2);
+
+      const list = document.getElementById('linksList');
+      list.innerHTML = '';
+      const li = document.createElement('li');
+      li.innerHTML = `<code>${d.groupLink || '—'}</code><span style="color:#8be9a1">${d.status || ''}</span>`;
+      list.appendChild(li);
+    }
+
+    document.getElementById('saveBtn').addEventListener('click', async ()=>{
+      const pwd = document.getElementById('adminPassword').value.trim();
+      const payload = {
+        groupName: document.getElementById('groupName').value.trim(),
+        groupLink: document.getElementById('groupLink').value.trim(),
+        status: document.getElementById('status').value,
+        membersCount: Number(document.getElementById('membersCount').value||0),
+        maxMembers: Number(document.getElementById('maxMembers').value||0),
+        sessionLink: document.getElementById('sessionLink').value.trim()
+      };
+      try{
+        const res = await fetch('/update-link', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({password:pwd, ...payload})
+        });
+        const j = await res.json();
+        if(res.ok && j.success){
+          document.getElementById('msg').style.display='block';
+          setTimeout(()=>document.getElementById('msg').style.display='none',2200);
+          populate();
+        }else{
+          alert('Error: '+(j.error||'Failed to save, check password'));
+        }
+      }catch(e){ alert('Network error'); console.error(e); }
+    });
+
+    document.getElementById('previewBtn').addEventListener('click', ()=>{ window.open('/', '_blank'); });
+    document.getElementById('openAdmin').addEventListener('click', ()=>{ window.open('/', '_self'); });
+
+    populate();
+  </script>
+</body>
+</html>
