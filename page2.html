@@ -43,7 +43,7 @@
       const res = await fetch('/group');
       if(res.ok){
         const g = await res.json();
-        whatsappLink = g.whatsappGroupLink || whatsappLink; // ✅ Pull from correct field
+        whatsappLink = g.groupLink || whatsappLink; // ✅ Pull from correct field
 
         // Set training slot info
         const d = reg && reg.date ? new Date(reg.date) : new Date(Date.now() + 86400000);
