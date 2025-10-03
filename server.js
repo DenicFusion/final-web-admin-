@@ -5,7 +5,7 @@ const app = express();
 
 const PORT = process.env.PORT || 10000;
 const DB_FILE = path.join(__dirname, 'db.json');
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Denic123*';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Jerry*';
 
 app.use(express.json());
 app.use(express.static(__dirname));
